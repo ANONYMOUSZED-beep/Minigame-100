@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MINIGAME·100 — a hundred handcrafted browser games</title>
+  <meta name="description" content="100 original mini games built from scratch — arcade, action, puzzle, sports, physics, rhythm, board and strategy. Synthesized audio, procedural art, zero downloads.">
+  <meta name="theme-color" content="#07060e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='.5' stop-color='%23a855f7'/%3E%3Cstop offset='1' stop-color='%23f43f5e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='56' height='56' rx='16' fill='%2307060e' stroke='url(%23g)' stroke-width='5'/%3E%3Ctext x='32' y='42' font-family='Arial Black,Arial' font-weight='900' font-size='24' text-anchor='middle' fill='url(%23g)'%3E100%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bgfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ============ LOADER ============ -->
+  <div id="loader">
+    <div class="ld-mark"><span>100</span></div>
+    <div class="ld-bar"><i id="ld-fill"></i></div>
+    <div class="ld-txt" id="ld-txt">Booting cartridges…</div>
+  </div>
+
+  <!-- ============ HUB ============ -->
+  <div id="hub">
+    <header class="topbar">
+      <a class="brand" href="#/" aria-label="MINIGAME 100 home">
+        <span class="mark">100</span>
+        <span class="word">MINIGAME<b>·</b>100</span>
+      </a>
+      <div class="top-actions">
+        <button class="icon-btn" id="hub-sfx" title="Sound effects" aria-label="Toggle sound effects"></button>
+        <button class="icon-btn" id="hub-music" title="Music" aria-label="Toggle music"></button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">A playable portfolio · 100 original games</p>
+        <h1>One hundred games.<br><span class="grad">Zero downloads.</span></h1>
+        <p class="lede">Arcade classics rebuilt with modern juice, twitchy action, brain-melting puzzles, physics toys, rhythm, sports and board-game AIs — every one written from scratch, with synthesized sound and procedural art.</p>
+        <div class="hero-cta">
+          <button class="btn primary" id="btn-random"><svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Surprise me</button>
+          <button class="btn ghost" id="btn-continue" hidden></button>
+        </div>
+      </div>
+      <div class="hero-stats" id="hero-stats"></div>
+    </section>
+
+    <nav class="filters" id="filters">
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search 100 games…" autocomplete="off" spellcheck="false">
+        <kbd>/</kbd>
+      </label>
+      <div class="chips" id="chips" role="tablist"></div>
+      <div class="sorter">
+        <button class="chip fav-toggle" id="fav-only" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>Favorites</button>
+        <select id="sort" aria-label="Sort games">
+          <option value="num">Sort: Number</option>
+          <option value="az">Sort: A → Z</option>
+          <option value="recent">Sort: Recently played</option>
+          <option value="plays">Sort: Most played</option>
+        </select>
+      </div>
+    </nav>
+
+    <main id="grid" class="grid"></main>
+    <p class="empty" id="empty" hidden>No games match that search.</p>
+
+    <footer class="foot">
+      <p>Built with vanilla JavaScript + Canvas 2D + Web Audio. No engines, no assets, no trackers.</p>
+      <p class="keys"><kbd>/</kbd> search · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> mute</p>
+    </footer>
+  </div>
+
+  <!-- ============ PLAYER ============ -->
+  <div id="play" hidden>
+    <header class="pbar">
+      <button class="icon-btn back" id="p-back" title="All games (Esc on title screen)" aria-label="Back to all games"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="p-title"><span class="p-num" id="p-num"></span><span class="p-name" id="p-name"></span><span class="p-cat" id="p-cat"></span></div>
+      <div class="hud" id="hud"></div>
+      <div class="p-actions">
+        <button class="icon-btn" id="p-restart" title="Restart (R)" aria-label="Restart"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5"/></svg></button>
+        <button class="icon-btn" id="p-pause" title="Pause (Esc / P)" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+        <button class="icon-btn" id="p-sfx" title="Sound effects (M)" aria-label="Toggle sound effects"></button>
+        <button class="icon-btn" id="p-music" title="Music" aria-label="Toggle music"></button>
+        <button class="icon-btn" id="p-fs" title="Fullscreen (F)" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+    </header>
+    <div class="stage" id="stage">
+      <div class="frame" id="frame">
+        <canvas id="screen"></canvas>
+        <div class="ov" id="ov-title" hidden>
+          <div class="card">
+            <div class="ov-meta"><span id="t-num"></span><span id="t-cat"></span></div>
+            <h2 id="t-name"></h2>
+            <p class="ov-desc" id="t-desc"></p>
+            <ul class="how" id="t-how"></ul>
+            <div class="ov-best" id="t-best"></div>
+            <button class="btn primary big" id="t-play"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z" fill="currentColor" stroke="none"/></svg>Play</button>
+            <p class="hint">Press <kbd>Enter</kbd> or <kbd>Space</kbd> · <kbd>Esc</kbd> to go back</p>
+          </div>
+        </div>
+        <div class="ov" id="ov-pause" hidden>
+          <div class="card slim">
+            <h2>Paused</h2>
+            <ul class="how" id="pa-how"></ul>
+            <div class="row">
+              <button class="btn primary" id="pa-resume">Resume</button>
+              <button class="btn ghost" id="pa-restart">Restart</button>
+              <button class="btn ghost" id="pa-quit">Quit</button>
+            </div>
+          </div>
+        </div>
+        <div class="ov" id="ov-over" hidden>
+          <div class="card slim">
+            <div class="ribbon" id="o-record" hidden>NEW RECORD</div>
+            <h2 id="o-title">Game Over</h2>
+            <p class="ov-desc" id="o-msg"></p>
+            <div class="score-big" id="o-score">0</div>
+            <div class="ov-best" id="o-best"></div>
+            <div class="row">
+              <button class="btn primary" id="o-retry"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5"/></svg>Play again</button>
+              <button class="btn ghost" id="o-next">Next game<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+              <button class="btn ghost" id="o-menu">All games</button>
+            </div>
+            <p class="hint"><kbd>Enter</kbd> play again · <kbd>N</kbd> next · <kbd>Esc</kbd> menu</p>
+          </div>
+        </div>
+      </div>
+      <div class="pad" id="pad" hidden></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/core/util.js"></script>
+  <script src="js/core/audio.js"></script>
+  <script src="js/core/engine.js"></script>
+  <script src="js/core/hub.js"></script>
+  <script src="js/games/manifest.js"></script>
+  <script src="js/boot.js"></script>
+</body>
+</html>
