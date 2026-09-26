@@ -95,7 +95,7 @@
   };
 
   /* ---------- colour ---------- */
-  const _cc = {};
+  let _cc = {}, _ccN = 0;
   function parse(c) {
     if (_cc[c]) return _cc[c];
     let r = 255, g = 255, b = 255, a = 1;
@@ -113,6 +113,7 @@
         r = Math.round(f(0) * 255); g = Math.round(f(8) * 255); b = Math.round(f(4) * 255);
       }
     }
+    if (++_ccN > 4000) { _cc = {}; _ccN = 0; }
     return (_cc[c] = [r, g, b, a]);
   }
   U.rgb = parse;
@@ -187,13 +188,15 @@
     },
     // pre-rendered radial glow sprite — fast additive glows without shadowBlur
     glowSprite(color) {
-      let c = glowCache.get(color);
+      // key on quantized RGB so dynamic hsl()/rgb() strings can't grow the cache without bound
+      const q = U.rgb(color), key = ((q[0] >> 3) << 10) | ((q[1] >> 3) << 5) | (q[2] >> 3);
+      let c = glowCache.get(key);
       if (c) return c;
       c = document.createElement('canvas'); c.width = c.height = 64;
       const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
       gr.addColorStop(0, U.rgba(color, 1)); gr.addColorStop(0.25, U.rgba(color, 0.55)); gr.addColorStop(0.6, U.rgba(color, 0.14)); gr.addColorStop(1, U.rgba(color, 0));
       x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
-      glowCache.set(color, c);
+      glowCache.set(key, c);
       return c;
     },
     glow(g, x, y, r, color, alpha = 1) {

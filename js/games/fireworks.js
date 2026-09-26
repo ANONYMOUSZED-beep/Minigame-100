@@ -11,7 +11,7 @@ MG.add({
     E.stat('Duds', '○○○○○');
     function launch() {
       const x = U.rand(120, W - 120), apexY = U.rand(90, 260), vy = -Math.sqrt(2 * 380 * (WATER - apexY));
-      rockets.push({ x, y: WATER, vx: U.rand(-30, 30), vy, hue: U.rand(360), type: U.pick(TYPES), t: 0, trail: [] });
+      rockets.push({ x, y: WATER, vx: U.rand(-30, 30), vy, hue: U.ri(0, 35) * 10, type: U.pick(TYPES), t: 0, trail: [] });
       E.sfx('whoosh', 1.4 + Math.random() * 0.3, 0.35);
     }
     function burst(r, quality) {

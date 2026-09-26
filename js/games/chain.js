@@ -9,7 +9,7 @@ MG.add({
     let level = -1, orbs, blasts, used, popped, state, stateT, T = 0, aimX = W / 2, aimY = H / 2, chainMax = 0;
     function load() {
       level++; const [n, need] = LV[level];
-      orbs = U.range(n).map(() => { const a = U.rand(U.TAU), sp = U.rand(40, 90); return { x: U.rand(30, W - 30), y: U.rand(30, H - 30), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 9, hue: U.rand(360), dead: false }; });
+      orbs = U.range(n).map(() => { const a = U.rand(U.TAU), sp = U.rand(40, 90); return { x: U.rand(30, W - 30), y: U.rand(30, H - 30), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 9, hue: U.ri(0, 35) * 10, dead: false }; });
       blasts = []; used = false; popped = 0; state = 'play'; chainMax = 0;
       E.stat('Level', `${level + 1}/12`); E.stat('Goal', `0/${need}`);
       E.banner(`LEVEL ${level + 1}`, `Pop ${need} of ${n}`, { color: '#fbbf24', life: 1.3 });
