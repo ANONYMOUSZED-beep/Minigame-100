@@ -260,6 +260,8 @@
     const s = H.session; if (!s || s.state !== 'ready') return;
     hideOverlays();
     Sound.play('select');
+    // don't let the key/tap that started the game leak into its first frame
+    MG.Input.pressed.clear(); MG.Input.typed.length = 0; MG.Input.ptr.hit = false;
     s.start();
     H.playStart = performance.now();
     store.set('plays:' + H.def.id, plays(H.def.id) + 1);
