@@ -167,7 +167,7 @@
     else if (H.sort === 'plays') list.sort((a, b) => plays(b.id) - plays(a.id) || a.num - b.num);
     const grid = $('#grid'), set = new Set(list.map((g) => g.id));
     H.cards.forEach((el, id) => { el.hidden = !set.has(id); });
-    list.forEach((g) => grid.appendChild(H.cards.get(g.id)));
+    list.forEach((g) => { const el = H.cards.get(g.id); if (el) grid.appendChild(el); });
     $('#empty').hidden = list.length > 0;
     H.visible = list;
   }
@@ -213,7 +213,9 @@
         over: (res) => setTimeout(() => gameOver(res), res.delay === undefined ? 700 : res.delay * 1000),
       });
     } catch (err) {
-      console.error(err); toast('This game failed to load: ' + err.message); throw err;
+      console.error(err); toast('Sorry — this game failed to start: ' + err.message);
+      setTimeout(() => (location.hash = '#/'), 0);
+      return;
     }
     H.session = s;
     H.playStart = 0;
