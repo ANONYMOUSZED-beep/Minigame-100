@@ -9,6 +9,8 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const args = process.argv.slice(2);
 const only = args.find((a) => !a.startsWith('--'));
 const shots = args.includes('--shots');
+const sheet = args.includes('--sheet');
+const sheetImgs = [];
 const secs = +(args.find((a) => a.startsWith('--secs=')) || '--secs=4').split('=')[1];
 const outDir = process.env.QA_OUT || path.join(root, '.qa');
 fs.mkdirSync(outDir, { recursive: true });
@@ -57,7 +59,11 @@ for (const id of ids) {
       await page.mouse.move(x + (Math.random() - 0.5) * 200, y + (Math.random() - 0.5) * 200, { steps: 4 });
       await page.mouse.up();
     } else await page.waitForTimeout(100);
-    if (shots && !shot1 && Date.now() - t0 > secs * 500) { shot1 = true; await page.screenshot({ path: path.join(outDir, id + '-1play.png') }); }
+    if (!shot1 && Date.now() - t0 > secs * 600) {
+      shot1 = true;
+      if (shots) await page.screenshot({ path: path.join(outDir, id + '-1play.png') });
+      if (sheet) sheetImgs.push({ id, b64: (await page.locator('#frame').screenshot()).toString('base64') });
+    }
     // if the game ended, restart to keep fuzzing
     const st = await page.evaluate(() => MG.hub.session && MG.hub.session.state);
     if (st === 'over') { await page.waitForTimeout(800); if (shots && !fs.existsSync(path.join(outDir, id + '-2over.png'))) await page.screenshot({ path: path.join(outDir, id + '-2over.png') }); await page.evaluate(() => MG.hub.restart()); }
@@ -69,6 +75,16 @@ for (const id of ids) {
 }
 cur = 'hub-end';
 if (shots) { await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(800); await page.screenshot({ path: path.join(outDir, '_hub2.png'), fullPage: false }); }
+if (sheet && sheetImgs.length) {
+  const per = 12;
+  for (let p = 0; p * per < sheetImgs.length; p++) {
+    const imgs = sheetImgs.slice(p * per, p * per + per);
+    const html = `<body style="margin:0;background:#111;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;width:1600px">${imgs.map((i) => `<div style="position:relative"><img src="data:image/png;base64,${i.b64}" style="width:100%;display:block"><b style="position:absolute;left:4px;top:4px;color:#fff;background:#000a;font:14px monospace;padding:2px 5px">${i.id}</b></div>`).join('')}</body>`;
+    const sp = await browser.newPage({ viewport: { width: 1612, height: 400 } });
+    await sp.setContent(html); await sp.waitForTimeout(200);
+    await sp.screenshot({ path: path.join(outDir, `_sheet${p}.png`), fullPage: true }); await sp.close();
+  }
+}
 console.log(report.map((r) => `${r.errors ? '✗' : '✓'} ${r.id.padEnd(14)} errors=${r.errors} state=${r.state}`).join('\n'));
 if (errors.length) { console.log('\nERRORS:'); console.log([...new Set(errors)].slice(0, 60).join('\n')); }
 await browser.close(); server.close();
