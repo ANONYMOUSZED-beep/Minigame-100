@@ -18,11 +18,12 @@ await page.goto(`http://localhost:${server.address().port}/index.html#/play/${id
 await page.waitForFunction(() => window.MG && MG.hub && MG.hub.session && document.querySelector('#loader.done'), null, { timeout: 20000 });
 await page.waitForTimeout(600);
 await page.evaluate(() => MG.hub.start());
-const box = await page.locator('#screen').boundingBox();
+let box = await page.locator('#screen').boundingBox();
 const def = await page.evaluate(() => ({ w: MG.hub.def.w, h: MG.hub.def.h }));
 const toPx = (x, y) => [box.x + (x / def.w) * box.width, box.y + (y / def.h) * box.height];
 for (const step of script.split(',').filter(Boolean)) {
   const [cmd, ...a] = step.split(':');
+  box = await page.locator('#screen').boundingBox();
   if (cmd === 'hold') { await page.keyboard.down(a[0]); await page.waitForTimeout(+a[1]); await page.keyboard.up(a[0]); }
   else if (cmd === 'down') await page.keyboard.down(a[0]);
   else if (cmd === 'up') await page.keyboard.up(a[0]);
