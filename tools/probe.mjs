@@ -12,9 +12,11 @@ await new Promise((r) => server.listen(0, r));
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
+page.on('console', (m) => { if (m.type() === 'log') console.log('LOG', m.text()); });
 await page.route(/fonts\.(googleapis|gstatic)/, (r) => r.abort());
 await page.goto(`http://localhost:${server.address().port}/index.html#/play/${id}`);
-await page.waitForFunction(() => window.MG && MG.hub && MG.hub.session, null, { timeout: 20000 });
+await page.waitForFunction(() => window.MG && MG.hub && MG.hub.session && document.querySelector('#loader.done'), null, { timeout: 20000 });
+await page.waitForTimeout(600);
 await page.evaluate(() => MG.hub.start());
 const box = await page.locator('#screen').boundingBox();
 const def = await page.evaluate(() => ({ w: MG.hub.def.w, h: MG.hub.def.h }));
@@ -27,7 +29,7 @@ for (const step of script.split(',').filter(Boolean)) {
   else if (cmd === 'press') await page.keyboard.press(a[0]);
   else if (cmd === 'wait') await page.waitForTimeout(+a[0]);
   else if (cmd === 'click') { const [x, y] = toPx(+a[0], +a[1]); await page.mouse.click(x, y); }
-  else if (cmd === 'drag') { const [x1, y1] = toPx(+a[0], +a[1]), [x2, y2] = toPx(+a[2], +a[3]); await page.mouse.move(x1, y1); await page.mouse.down(); await page.mouse.move(x2, y2, { steps: 10 }); await page.mouse.up(); }
+  else if (cmd === 'drag') { const [x1, y1] = toPx(+a[0], +a[1]), [x2, y2] = toPx(+a[2], +a[3]); await page.mouse.move(x1, y1); await page.mouse.down(); for (let k = 1; k <= 10; k++) { await page.mouse.move(x1 + ((x2 - x1) * k) / 10, y1 + ((y2 - y1) * k) / 10); await page.waitForTimeout(+(a[4] || 20)); } await page.mouse.up(); }
   else if (cmd === 'mhold') { const [x, y] = toPx(+a[0], +a[1]); await page.mouse.move(x, y); await page.mouse.down(); await page.waitForTimeout(+a[2]); await page.mouse.up(); }
   else if (cmd === 'type') await page.keyboard.type(a.join(':'), { delay: 40 });
   else if (cmd === 'shot') await page.locator('#frame').screenshot({ path: a[0] });
