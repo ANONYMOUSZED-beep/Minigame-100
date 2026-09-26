@@ -390,7 +390,7 @@
     right += '</div>';
     el.innerHTML = left + right; el.hidden = false;
     el.querySelectorAll('button').forEach((b) => {
-      const code = PADMAP[b.dataset.k];
+      const code = (def.padKeys && def.padKeys[b.dataset.k]) || PADMAP[b.dataset.k];
       const on = (e) => { e.preventDefault(); b.classList.add('on'); MG.vpress(code, true); Sound.init(); };
       const off = (e) => { e.preventDefault(); b.classList.remove('on'); MG.vpress(code, false); };
       b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off);
